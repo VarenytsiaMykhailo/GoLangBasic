@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 //объявление нескольких переменных в одном блоке. Т.к. они не в функции, то являются глобальными переменными уровня файла
 var (
 	m1 int = 12
@@ -114,6 +116,14 @@ func main() {
 	escaping := `Hello\r\n //comment 
 	World` //используется при создании шаблонов и регулярных выражений
 	println(escaping) //\r\n //comment, перевод строки и табуляцию перед World выведет на экран
+	//return
+
+
+	//Руны
+	var symbol rune = 'a'
+	var autoSymbol = 'a'
+	unicodeSymbolIdByNumber := '\u2318'
+	fmt.Println(symbol, autoSymbol, unicodeSymbolIdByNumber) // выведутся коды юникода символов
 	//return
 
 }

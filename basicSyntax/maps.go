@@ -61,20 +61,4 @@ func main()  {
 	}
 	//return
 
-
-	a := 1
-	switch a {
-	case 1 :
-		fmt.Println("a 1")
-		fallthrough
-	case 2 : fmt.Println("a 2")
-	case 3: fmt.Println("a 3")
-	default:
-		fmt.Println("default")
-	case 4: fmt.Println("a 4")
-
-
-
-	}
-
 }
