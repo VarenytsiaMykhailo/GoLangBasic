@@ -18,15 +18,14 @@ func main() {
 		os.Exit(1)
 	}
 	defer file.Close()
-	writer := bufio.NewWriter(file)
+	writer := bufio.NewWriter(file)  // Для создания потока вывода через буфер применяется функция-конструктор bufio.NewWriter()
 
 	for _, row := range rows {
-		writer.WriteString(row)  // запись строки
+		writer.WriteString(row)  // запись строки. Принимает строку и записывает ее в виде последовательности байтов в кодировке UTF-8
 		writer.WriteString(`\n`) // явный перевод строки в тексте .txt файла
 		writer.WriteString("\n") // будет невидим в .txt файле
-
 	}
-	writer.Flush() // сбрасываем данные из буфера в файл
+	writer.Flush()// При выполнении различных методов объекта writer данные вначале накапливаются в буфере, а чтобы сбросить их в источник данных, необходимо вызвать метод Flush().
 
 	file, err = os.Open("text.txt")
 	if err != nil {
@@ -34,9 +33,9 @@ func main() {
 		return
 	}
 	defer file.Close()
-	reader := bufio.NewReader(file)
+	reader := bufio.NewReader(file)  // Для создания потока ввода через буфер применяется функция-конструктор bufio.NewReader()
 	for {//reader.ReadString будет читать текст с того места, на котором остановился
-		line, err := reader.ReadString('\n')
+		line, err := reader.ReadString('\n') //читает (или строго говоря, декодирует) последовательность двоичных байтов, как текст в кодировке UNF-8 или в ASCII , до байта с указанным значением, включая его ('\n') или до конца файла
 		if err != nil {
 			if err == io.EOF {
 				fmt.Println("EOF")
