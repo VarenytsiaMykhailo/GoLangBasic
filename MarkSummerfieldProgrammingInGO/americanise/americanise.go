@@ -1,13 +1,15 @@
 package main
-//D:\GOPROJECTS\src\github.com\VarenytsiaMykhailo\GoLangBasic\MarkSummerfieldProgrammingInGO\americanise\americanise.go
+
 import (
 	"bufio"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 func main()  {
@@ -15,9 +17,7 @@ func main()  {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("inFileName and outFileName: ", inFileName, outFileName) // отладка
 	inFile, outFile := os.Stdin, os.Stdout
-	fmt.Println("inFile and outFile: ", inFile, outFile) // отладка
 	if inFileName != "" {
 		if inFile, err = os.Open(inFileName); err != nil {
 			log.Fatal(err)
@@ -31,10 +31,6 @@ func main()  {
 		}
 		defer outFile.Close()
 	}
-	fmt.Println("_____________________________________________________") //отладка
-	fmt.Println("inFileName and outFileName: ", inFileName, outFileName) // отладка
-	fmt.Println("inFile and outFile: ", inFile, outFile) // отладка
-
 	if err = americanise(inFile, outFile); err != nil {
 		log.Fatal(err)
 	}
@@ -57,7 +53,7 @@ func filenamesFromCommandline() (inFileName, outFileName string, err error) {
 	return inFileName, outFileName, nil
 }
 
-var britishAmerican = "british-american.txt" //здесь содержатся строки с оригиинальными и замещающими их словами
+var britishAmerican = `D:\GOPROJECTS\src\github.com\VarenytsiaMykhailo\GoLangBasic\MarkSummerfieldProgrammingInGO\americanise\british-american.txt` //здесь содержатся строки с оригиинальными и замещающими их словами
 func americanise(inFile io.Reader, outFile io.Writer) (err error) {
 	//Для чтения из источника данных и записи в него через буфер в пакете bufio определены типы Reader и Writer.
 	reader := bufio.NewReader(inFile) // Для создания потока ввода через буфер применяется функция-конструктор bufio.NewReader()
@@ -74,8 +70,8 @@ func americanise(inFile io.Reader, outFile io.Writer) (err error) {
 	wordRx := regexp.MustCompile("[A-Za-z]+") //этому регулярному выражению соответствует последовательность из алфавитных символов латиницы
 	eof := false
 	for !eof {
-		var line string //(2)
-		line, err = reader.ReadString('\n') //читает (или строго говоря, декодирует) последовательность двоичных байтов, как текст в кодировке UNF-8 или в ASCII , до байта с указанным значением, включая его ('\n') или до конца файла
+		var line string
+		line, err = reader.ReadString('\n') //читает (или строго говоря, декодирует) последовательность двоичных байтов, как текст в кодировке UTF-8 или в ASCII , до байта с указанным значением, включая его ('\n') или до конца файла
 		if err == io.EOF {
 			err = nil //признак io.EOF не является ошибкой
 			eof = true // преращаем цикл в след. итерации
@@ -91,4 +87,33 @@ func americanise(inFile io.Reader, outFile io.Writer) (err error) {
 	}
 	return nil
 }
+
+/*makeReplacerFunction предполагает, что файл содержи текст в кодировке UTF-8,
+где в каждой строке находятся оригинальное слово и слово замены,разделенные пробельными символами*/
+func makeReplacerFunction(file string) (func(string) string, error) {
+	rawBytes, err := ioutil.ReadFile(file) //высокоуровневая функция. Читает файл целиком и возвращает все его содержимое в виде последовательности двоичных байтов ([]byte)
+	if err != nil {
+		return nil, err
+	}
+	text := string(rawBytes)
+	usForBritish := make(map[string]string)
+	lines := strings.Split(text, "\n")
+	for _, line := range lines {
+		fields := strings.Fields(line) //аналог strings.Split, разбиение идет по пробельным символам (табуляция и тд)
+		if len(fields) == 2 {
+			usForBritish[fields[0]] = fields[1]
+		}
+	}
+	return func(word string) string {
+		if usWord, found := usForBritish[word]; found {
+			return usWord
+		}
+		return word
+	}, nil
+}
+
+
+
+
+
 
