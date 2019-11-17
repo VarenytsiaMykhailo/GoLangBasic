@@ -11,6 +11,6 @@ type Person struct {
 	secret string
 }
 
-func (p Person) UpdateSecret(secret string) {
+func (p *Person) UpdateSecret(secret string) {
 	p.secret = secret
 }
