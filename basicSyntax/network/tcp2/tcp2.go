@@ -25,7 +25,7 @@ func main() {
 
 		go func(conn net.Conn) {
 			defer func() {
-				fmt.Println("Closed")
+				fmt.Println("Connection closed")
 				conn.Close()
 			}()
 			// создаем Reader для чтения информации из сокета
