@@ -10,15 +10,23 @@ import (
 )
 
 const (
-	pageTop    = `<!DOCTYPE HTML><html><head>
-<style>.error{color:#FF0000;}</style></head><title>Statistics</title>
-<body><h3>Statistics</h3>
-<p>Computes basic statistics for a given list of numbers</p>`
-	form       = `<form action="/" method="POST">
-<label for="numbers">Numbers (comma or space-separated):</label><br />
-<input type="text" name="numbers" size="30"><br />
-<input type="submit" value="Calculate">
-</form>`
+	pageTop = `
+	<!DOCTYPE HTML><html>
+	<head>
+		<style>.error{color:#FF0000;}</style>
+	</head>
+	<title>Statistics</title>
+	<body>
+		<h3>Statistics</h3>
+		<p>Computes basic statistics for a given list of numbers</p>
+	`
+	form = `
+	<form action="/" method="POST">
+	<label for="numbers">Numbers (comma or space-separated):</label><br />
+	<input type="text" name="numbers" size="30"><br />
+	<input type="submit" value="Calculate">
+	</form>
+	`
 	pageBottom = `</body></html>`
 	anError    = `<p class="error">%s</p>`
 )
@@ -28,6 +36,7 @@ type statistics struct {
 	mean    float64
 	median  float64
 }
+
 /*
 Функция http.HandleFunc() принимает два аргумента: путь и ссылку на функцию, которую
 следует вызвать при поступлении запроса по указанному пути.
@@ -42,7 +51,7 @@ type statistics struct {
 если использование этого номера вызывает конфликты с существующим сервером.)
 Вторым аргументом принимается тип сервера. Обычно в нем передается nil, чтобы выбрать тип по умолчанию
 */
-func main()  {
+func main() {
 	http.HandleFunc("/", homePage)
 	if err := http.ListenAndServe(":9001", nil); err != nil {
 		log.Fatal("failed to start server", err)
@@ -53,8 +62,27 @@ func main()  {
 В аргументе writer передается значение, куда должен записываться ответ (в формате HTML), а в аргументе
 request – подробная информация о запросе.
 */
-func homePage(writer http.ResponseWriter, request *http.Request)  {
-	err := request.ParseForm() //Должна вызываться перед записью в ответ
+func homePage(writer http.ResponseWriter, request *http.Request) {
+	err := request.ParseForm() //Анализ аргументов. Должен вызываться перед записью в ответ
+	fmt.Println("r.URL", request.URL)
+	fmt.Println("r.Body", request.Body)
+	fmt.Println("r.GetBody", request.GetBody)
+	fmt.Println("r.Header", request.Header)
+	fmt.Println("r.Host", request.Host)
+	fmt.Println("r.Method", request.Method)
+	fmt.Println("r.Proto", request.Proto)
+	fmt.Println("r.RemoteAddr", request.RemoteAddr)
+
+	fmt.Println(request.Form) // вывод информации о форме на стороне сервера
+	fmt.Println("path", request.URL.Path)
+	fmt.Println("scheme", request.URL.Scheme)
+	fmt.Println(request.Form["url_long"])
+	fmt.Println("FORM:")
+	for k, v := range request.Form {
+		fmt.Println("key:", k)
+		fmt.Println("val:", strings.Join(v, ""))
+	}
+
 	fmt.Fprint(writer, pageTop, form)
 	if err != nil {
 		fmt.Fprintf(writer, anError, err)
@@ -69,7 +97,7 @@ func homePage(writer http.ResponseWriter, request *http.Request)  {
 	fmt.Fprint(writer, pageBottom)
 }
 
-func processRequest(request *http.Request) ([]float64, string, bool)  {
+func processRequest(request *http.Request) ([]float64, string, bool) {
 	var numbers []float64
 	if slice, found := request.Form["numbers"]; found && len(slice) > 0 {
 		text := strings.Replace(slice[0], ",", " ", -1)
@@ -99,7 +127,7 @@ func formatStats(stats statistics) string {
 
 func getStats(numbers []float64) (stats statistics) {
 	stats.numbers = numbers
-	sort.Float64s(stats.numbers)// аргумент функции numbers тоже отсортируется
+	sort.Float64s(stats.numbers) // аргумент numbers функции getStats тоже отсортируется т.к. numbers и stats.numbers ссылаются в памяти на один массив
 	stats.mean = sum(numbers) / float64(len(numbers))
 	stats.median = median(numbers)
 	return stats
